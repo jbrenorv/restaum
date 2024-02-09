@@ -1,7 +1,19 @@
-import 'package:flutter/material.dart';
-import 'package:restaum/pages/game_page.dart';
+import 'dart:io';
 
-void main() {
+import 'package:flutter/material.dart';
+import 'package:window_manager/window_manager.dart';
+
+import 'pages/game_page.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  if (Platform.isLinux || Platform.isMacOS || Platform.isWindows) {
+    windowManager.ensureInitialized();
+    windowManager.setMinimumSize(const Size.square(500.0));
+    windowManager.setTitle('Resta um');
+  }
+
   runApp(const MyApp());
 }
 
@@ -11,10 +23,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData.dark(
-        // colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
         useMaterial3: true,
+        scaffoldBackgroundColor: const Color(0xFFDDDDDD),
+        fontFamily: 'Press Start 2P',
       ),
       home: const GamePage(),
     );
