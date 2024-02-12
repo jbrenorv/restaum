@@ -1,65 +1,73 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../bloc/game_bloc.dart';
+import '../bloc/game_events.dart';
+import '../bloc/game_state.dart';
 import '../entities/chat_message_entity.dart';
+import '../utils/constants.dart';
 
 class ChatWidget extends StatelessWidget {
   const ChatWidget({
     super.key,
+    required this.bloc,
     required this.closeChat,
-    required this.messages,
-    required this.sendMessage,
     required this.controller,
   });
 
-  final List<ChatMessageEntity> messages;
+  final GameBloc bloc;
   final VoidCallback closeChat;
-  final void Function(ChatMessageEntity) sendMessage;
   final TextEditingController controller;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        SizedBox.fromSize(
-          size: const Size.fromHeight(96.0),
-          child: DrawerHeader(
-            padding: EdgeInsets.zero,
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: ListTile(
-                leading: IconButton(
-                  tooltip: 'Fechar',
-                  onPressed: closeChat,
-                  icon: const Icon(Icons.close),
+    return BlocBuilder<GameBloc, GameState>(
+      bloc: bloc,
+      builder: (context, state) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SizedBox.fromSize(
+              size: const Size.fromHeight(96.0),
+              child: DrawerHeader(
+                padding: EdgeInsets.zero,
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: ListTile(
+                    leading: IconButton(
+                      tooltip: 'Fechar',
+                      onPressed: closeChat,
+                      icon: const Icon(Icons.close),
+                    ),
+                    title: const Text('Chat'),
+                  ),
                 ),
-                title: const Text('Chat'),
               ),
             ),
-          ),
-        ),
-        Expanded(
-          child: ScrollConfiguration(
-            behavior: const MaterialScrollBehavior().copyWith(
-              dragDevices: {
-                PointerDeviceKind.mouse,
-                PointerDeviceKind.touch,
-              },
-            ),
-            child: ListView.builder(
-              padding: const EdgeInsets.all(8.0),
-              itemCount: messages.length,
-              reverse: true,
-              itemBuilder: (context, index) => _buildMessageWidget(
-                messages[messages.length - index - 1],
+            Expanded(
+              child: ScrollConfiguration(
+                behavior: const MaterialScrollBehavior().copyWith(
+                  dragDevices: {
+                    PointerDeviceKind.mouse,
+                    PointerDeviceKind.touch,
+                  },
+                ),
+                child: ListView.builder(
+                  padding: const EdgeInsets.all(8.0),
+                  itemCount: state.messages.length,
+                  reverse: true,
+                  itemBuilder: (context, index) => _buildMessageWidget(
+                    state.messages[state.messages.length - index - 1],
+                  ),
+                ),
               ),
             ),
-          ),
-        ),
-        _buildInput(),
-      ],
+            _buildInput(),
+          ],
+        );
+      },
     );
   }
 
@@ -85,7 +93,7 @@ class ChatWidget extends StatelessWidget {
             child: Text(
               message.text,
               style: const TextStyle(
-                fontFamily: 'Roboto Mono',
+                fontFamily: Constants.robotoFontFamily,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -99,7 +107,7 @@ class ChatWidget extends StatelessWidget {
     return Theme(
       data: ThemeData(
         useMaterial3: true,
-        fontFamily: 'Roboto Mono',
+        fontFamily: Constants.robotoFontFamily,
       ),
       child: SizedBox.fromSize(
         size: const Size.fromHeight(96.0),
@@ -130,7 +138,14 @@ class ChatWidget extends StatelessWidget {
 
   void _sendMessage() {
     if (controller.text.isNotEmpty) {
-      sendMessage(ChatMessageEntity(text: controller.text, isMine: true));
+      bloc.add(
+        SendMessageEvent(
+          ChatMessageEntity(
+            text: controller.text,
+            isMine: true,
+          ),
+        ),
+      );
       controller.clear();
     }
   }

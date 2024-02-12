@@ -1,6 +1,6 @@
 class DestinationEntity {
   final int destination;
-  final int enemy;
+  final int capture;
 
-  DestinationEntity({required this.destination, required this.enemy});
+  DestinationEntity({required this.destination, required this.capture});
 }

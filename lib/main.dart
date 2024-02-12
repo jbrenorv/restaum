@@ -3,7 +3,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 
-import 'pages/game_page.dart';
+import 'pages/user_identification_page.dart';
+import 'utils/constants.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,9 +28,13 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         useMaterial3: true,
         scaffoldBackgroundColor: const Color(0xFFDDDDDD),
-        fontFamily: 'Press Start 2P',
+        fontFamily: Constants.pressStartFontFamily,
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFFDDDDDD),
+          surfaceTintColor: Colors.transparent,
+        ),
       ),
-      home: const GamePage(),
+      home: const UserIdentificationPage(),
     );
   }
 }

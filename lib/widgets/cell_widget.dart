@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../entities/cell_entity.dart';
 import '../entities/destination_entity.dart';
+import 'circle_widget.dart';
 
 class CellWidget extends StatelessWidget {
   const CellWidget({
@@ -11,6 +12,8 @@ class CellWidget extends StatelessWidget {
     required this.onTap,
     required this.destinations,
     required this.onCellDropped,
+    required this.myTurn,
+    required this.gameOver,
   }) : super(key: key);
 
   final int selectedIndex;
@@ -18,6 +21,8 @@ class CellWidget extends StatelessWidget {
   final List<DestinationEntity> destinations;
   final void Function(CellEntity) onTap;
   final void Function(CellEntity, CellEntity) onCellDropped;
+  final bool myTurn;
+  final bool gameOver;
 
   @override
   Widget build(BuildContext context) {
@@ -47,14 +52,11 @@ class CellWidget extends StatelessWidget {
     if (_isDestination) {
       return DragTarget<CellEntity>(
         onAccept: (droppedCell) => onCellDropped(droppedCell, cell),
-        builder: (context, candidateData, rejectedData) {
-          // final hasData = candidateData.isNotEmpty;
-          return child;
-        },
+        builder: (context, candidateData, rejectedData) => child,
       );
     }
 
-    if (_empty) return child;
+    if (_empty || !myTurn || gameOver) return child;
 
     return Draggable<CellEntity>(
       data: cell,
@@ -98,26 +100,4 @@ class CellWidget extends StatelessWidget {
   bool get _selected => cell.index == selectedIndex;
 
   bool get _empty => cell.empty;
-}
-
-class CircleWidget extends StatelessWidget {
-  const CircleWidget({
-    super.key,
-    this.color,
-    this.child,
-  });
-
-  final Color? color;
-  final Widget? child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: color,
-        shape: BoxShape.circle,
-      ),
-      child: child,
-    );
-  }
 }

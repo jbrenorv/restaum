@@ -1,6 +1,6 @@
-import 'package:restaum/entities/chat_message_entity.dart';
-
 import '../entities/cell_entity.dart';
+import '../entities/chat_message_entity.dart';
+import '../socket/dto/socket_dto.dart';
 
 abstract class GameEvent {}
 
@@ -23,4 +23,26 @@ class SendMessageEvent extends GameEvent {
   final ChatMessageEntity message;
 
   SendMessageEvent(this.message);
+}
+
+class SocketDataEvent extends GameEvent {
+  final SocketDto data;
+  final bool chatOpen;
+
+  SocketDataEvent({
+    required this.data,
+    required this.chatOpen,
+  });
+}
+
+class OpenChatEvent extends GameEvent {}
+
+class WhiteFlagEvent extends GameEvent {}
+
+class NewGameEvent extends GameEvent {
+  final bool start;
+  final String firstPlayer;
+  final String secondPlayer;
+
+  NewGameEvent(this.start, this.firstPlayer, this.secondPlayer);
 }
