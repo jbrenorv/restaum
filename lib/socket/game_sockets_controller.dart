@@ -4,7 +4,6 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:dart_ipify/dart_ipify.dart';
 import 'package:network_info_plus/network_info_plus.dart';
 
 import 'dto/socket_dto.dart';
@@ -19,13 +18,12 @@ class GameSocketsController {
   static GameSocketsController get instance => _instance;
 
   late final String serverIp;
-  late final String publicIp;
   late final int serverPort;
   late final String userName;
 
   late final StreamController<SocketDto> _dataStreamCotroller;
   late final ServerSocket _server;
-  late final Socket _socket;
+  late Socket _socket;
 
   Stream<SocketDto> get dataStream => _dataStreamCotroller.stream;
 
@@ -39,7 +37,6 @@ class GameSocketsController {
     this.userName = userName;
     serverPort = _server.port;
     serverIp = _server.address.address;
-    publicIp = await Ipify.ipv4();
 
     _server.listen(
       (socket) => _onConnectionEstablished(
@@ -67,8 +64,11 @@ class GameSocketsController {
   void _onConnectionEstablished(Socket socket, ConnectionInitiator initiator) {
     _socket = socket;
     _socket.encoding = utf8;
-    _socket.listen(_onReceiveData,
-    onError: 
+    _socket.listen(
+      _onReceiveData,
+      cancelOnError: true,
+      onError: (_) => _onErrorOrDone(),
+      onDone: _onErrorOrDone,
     );
 
     if (initiator == ConnectionInitiator.i) startGame();
@@ -80,26 +80,74 @@ class GameSocketsController {
     _dataStreamCotroller.add(data);
   }
 
+  void _onErrorOrDone() {
+    _dataStreamCotroller.add(SocketDto.disconnectedPair());
+  }
+
   void startGame() {
     // randomly select who will make the first move
     final enemyStarts = Random().nextInt(2).isEven;
 
-    sendMessage(
+    _sendMessage(
       SocketDto.start(
         start: enemyStarts,
         ack: false,
+        accept: false,
         enemy: userName,
       ),
     );
   }
 
-  void sendMessage(SocketDto dto) async {
-    await _socket.flush();
-    _socket.write(dto.toJson());
+  void exit() {
+    _sendMessage(SocketDto.disconnectedPair());
   }
 
-  void dispose() {
-    _server.close();
-    _socket.close();
+  void accept(bool start) {
+    _sendMessage(
+      SocketDto.start(
+        start: start,
+        ack: true,
+        accept: true,
+        enemy: userName,
+      ),
+    );
+  }
+
+  void decline(bool start) {
+    _sendMessage(
+      SocketDto.start(
+        start: start,
+        ack: true,
+        accept: false,
+        enemy: userName,
+      ),
+    );
+  }
+
+  void chat(String message) {
+    _sendMessage(SocketDto.chat(message: message));
+  }
+
+  void whiteFlag() {
+    _sendMessage(SocketDto.whiteFlag());
+  }
+
+  void movement({
+    required int sourceIndex,
+    required int captureIndex,
+    required int destinationIndex,
+  }) {
+    _sendMessage(
+      SocketDto.movement(
+        sourceIndex: sourceIndex,
+        captureIndex: captureIndex,
+        destinationIndex: destinationIndex,
+      ),
+    );
+  }
+
+  void _sendMessage(SocketDto dto) async {
+    await _socket.flush();
+    _socket.write(dto.toJson());
   }
 }

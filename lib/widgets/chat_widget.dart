@@ -23,51 +23,53 @@ class ChatWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<GameBloc, GameState>(
-      bloc: bloc,
-      builder: (context, state) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SizedBox.fromSize(
-              size: const Size.fromHeight(96.0),
-              child: DrawerHeader(
-                padding: EdgeInsets.zero,
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: ListTile(
-                    leading: IconButton(
-                      tooltip: 'Fechar',
-                      onPressed: closeChat,
-                      icon: const Icon(Icons.close),
+    return Scaffold(
+      body: BlocBuilder<GameBloc, GameState>(
+        bloc: bloc,
+        builder: (context, state) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox.fromSize(
+                size: const Size.fromHeight(96.0),
+                child: DrawerHeader(
+                  padding: EdgeInsets.zero,
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: ListTile(
+                      leading: IconButton(
+                        tooltip: 'Fechar',
+                        onPressed: closeChat,
+                        icon: const Icon(Icons.close),
+                      ),
+                      title: const Text('Chat'),
                     ),
-                    title: const Text('Chat'),
                   ),
                 ),
               ),
-            ),
-            Expanded(
-              child: ScrollConfiguration(
-                behavior: const MaterialScrollBehavior().copyWith(
-                  dragDevices: {
-                    PointerDeviceKind.mouse,
-                    PointerDeviceKind.touch,
-                  },
-                ),
-                child: ListView.builder(
-                  padding: const EdgeInsets.all(8.0),
-                  itemCount: state.messages.length,
-                  reverse: true,
-                  itemBuilder: (context, index) => _buildMessageWidget(
-                    state.messages[state.messages.length - index - 1],
+              Expanded(
+                child: ScrollConfiguration(
+                  behavior: const MaterialScrollBehavior().copyWith(
+                    dragDevices: {
+                      PointerDeviceKind.mouse,
+                      PointerDeviceKind.touch,
+                    },
+                  ),
+                  child: ListView.builder(
+                    padding: const EdgeInsets.all(8.0),
+                    itemCount: state.messages.length,
+                    reverse: true,
+                    itemBuilder: (context, index) => _buildMessageWidget(
+                      state.messages[state.messages.length - index - 1],
+                    ),
                   ),
                 ),
               ),
-            ),
-            _buildInput(),
-          ],
-        );
-      },
+              _buildInput(),
+            ],
+          );
+        },
+      ),
     );
   }
 

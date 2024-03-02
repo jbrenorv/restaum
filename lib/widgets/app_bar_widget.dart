@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:restaum/utils/utils.dart';
 
 import '../bloc/game_bloc.dart';
 import '../bloc/game_state.dart';
@@ -11,6 +12,19 @@ AppBar appBarWidget({
   required VoidCallback openChat,
   required VoidCallback toogleSound,
 }) {
+  TextStyle? playerNameTextStyle;
+  double? swordsImageSize;
+  double swordsHorizontalPadding = 32.0;
+
+  if (!isPlatformDesktop) {
+    playerNameTextStyle = const TextStyle(
+      fontWeight: FontWeight.w400,
+      fontSize: 14.0,
+    );
+    swordsImageSize = 16.0;
+    swordsHorizontalPadding = 8.0;
+  }
+
   return AppBar(
     toolbarHeight: 76.0,
     titleSpacing: 0.0,
@@ -32,13 +46,25 @@ AppBar appBarWidget({
                     child: Text(
                       state.firstPlayer,
                       textAlign: TextAlign.right,
+                      style: playerNameTextStyle,
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 32.0),
-                    child: Image.asset(Constants.swordsImagePath),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: swordsHorizontalPadding,
+                    ),
+                    child: Image.asset(
+                      Constants.swordsImagePath,
+                      height: swordsImageSize,
+                      width: swordsImageSize,
+                    ),
                   ),
-                  Expanded(child: Text(state.secondPlayer)),
+                  Expanded(
+                    child: Text(
+                      state.secondPlayer,
+                      style: playerNameTextStyle,
+                    ),
+                  ),
                   IconButton(
                     tooltip:
                         '${state.soundEnable ? 'Desabilitar' : 'Habilitar'} som',

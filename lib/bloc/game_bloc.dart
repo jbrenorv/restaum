@@ -4,7 +4,6 @@ import 'package:bloc/bloc.dart';
 import '../entities/chat_message_entity.dart';
 import '../entities/destination_entity.dart';
 import '../socket/dto/data_type.dart';
-import '../socket/dto/socket_dto.dart';
 import '../socket/game_sockets_controller.dart';
 import '../utils/constants.dart';
 import '../utils/utils.dart';
@@ -75,7 +74,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
   }
 
   void _sendMessage(SendMessageEvent event, Emitter emit) {
-    _socketsController.sendMessage(SocketDto.chat(message: event.message.text));
+    _socketsController.chat(event.message.text);
     emit(state.copyWith(messages: state.messages..add(event.message)));
   }
 
@@ -114,7 +113,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
   }
 
   void _onWhiteFlag(WhiteFlagEvent event, Emitter emit) {
-    _socketsController.sendMessage(SocketDto.whiteFlag());
+    _socketsController.whiteFlag();
     emit(state.copyWith(gameOver: true, whiteFlag: false));
   }
 
@@ -147,12 +146,10 @@ class GameBloc extends Bloc<GameEvent, GameState> {
           .firstWhere((d) => d.destination == destinationIndex)
           .capture;
 
-      _socketsController.sendMessage(
-        SocketDto.movement(
-          sourceIndex: sourceIndex,
-          captureIndex: captureIndex,
-          destinationIndex: destinationIndex,
-        ),
+      _socketsController.movement(
+        sourceIndex: sourceIndex,
+        captureIndex: captureIndex,
+        destinationIndex: destinationIndex,
       );
     }
 

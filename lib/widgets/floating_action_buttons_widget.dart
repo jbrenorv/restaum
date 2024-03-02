@@ -28,30 +28,34 @@ class FloatingActionButtonsWidget extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             if (state.gameOver) ...[
-              FloatingActionButton(
+              FloatingActionButton.small(
                 tooltip: 'Novo jogo',
                 heroTag: 'new-game',
                 backgroundColor: Colors.white,
-                onPressed: state.gameOver ? newGame : null,
+                onPressed: newGame,
                 child: Image.asset(Constants.swordsImagePath),
               ),
-              const SizedBox(height: 16.0),
+              const SizedBox(height: 12.0),
             ],
-            FloatingActionButton(
-              tooltip: 'Desistir',
-              heroTag: 'flag',
-              backgroundColor: Colors.white,
-              onPressed: state.gameOver ? null : whiteFlag,
-              child: const Icon(Icons.flag),
-            ),
-            const SizedBox(height: 16.0),
-            FloatingActionButton(
-              tooltip: 'Sair',
-              heroTag: 'exit',
-              backgroundColor: Colors.white,
-              onPressed: state.gameOver ? exit : null,
-              child: const Icon(Icons.exit_to_app),
-            ),
+            if (!state.gameOver) ...[
+              FloatingActionButton.small(
+                tooltip: 'Desistir',
+                heroTag: 'flag',
+                backgroundColor: Colors.white,
+                onPressed: whiteFlag,
+                child: const Icon(Icons.flag),
+              ),
+              const SizedBox(height: 12.0),
+            ],
+            if (state.gameOver) ...[
+              FloatingActionButton.small(
+                tooltip: 'Sair',
+                heroTag: 'exit',
+                backgroundColor: Colors.white,
+                onPressed: exit,
+                child: const Icon(Icons.exit_to_app),
+              ),
+            ],
           ],
         );
       },

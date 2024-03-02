@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:restaum/pages/home_page.dart';
 
 import '../bloc/game_bloc.dart';
 import '../bloc/game_events.dart';
@@ -16,6 +17,7 @@ import '../widgets/app_bar_widget.dart';
 import '../widgets/cell_widget.dart';
 import '../widgets/challenge_dialog_widget.dart';
 import '../widgets/chat_widget.dart';
+import '../widgets/disconnected_pair_dialog_widget.dart';
 import '../widgets/floating_action_buttons_widget.dart';
 import '../widgets/footer_widget.dart';
 import '../widgets/game_over_dialog.dart';
@@ -46,6 +48,7 @@ class _GamePageState extends State<GamePage> {
 
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   final _chatInputController = TextEditingController();
+  bool _isChatOpen = false;
 
   @override
   void initState() {
@@ -85,7 +88,7 @@ class _GamePageState extends State<GamePage> {
       ),
       floatingActionButton: FloatingActionButtonsWidget(
         bloc: _bloc,
-        exit: () {},
+        exit: _exit,
         newGame: _newGame,
         whiteFlag: _whiteFlag,
       ),
@@ -97,9 +100,11 @@ class _GamePageState extends State<GamePage> {
         builder: (context, state) {
           return Center(
             child: ConstrainedBox(
-              constraints: BoxConstraints.loose(const Size.square(400.0)),
+              constraints: BoxConstraints.loose(const Size.fromWidth(400.0)),
               child: GridView(
                 shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                padding: const EdgeInsets.symmetric(vertical: 16.0),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 7,
                 ),
@@ -153,6 +158,11 @@ class _GamePageState extends State<GamePage> {
       _bloc.add(CellDroppedEvent(cell, destination));
 
   void _onSocketData(SocketDto data) {
+    if (data.type.equals(DataType.disconnectedPair)) {
+      _onDisconnectedPairSocketData(data);
+      return;
+    }
+
     if (data.type.equals(DataType.start)) {
       _onReceiveNewGameSocketData(data);
       return;
@@ -161,7 +171,8 @@ class _GamePageState extends State<GamePage> {
     _bloc.add(
       SocketDataEvent(
         data: data,
-        chatOpen: _scaffoldKey.currentState?.isDrawerOpen ?? false,
+        chatOpen:
+            _isChatOpen || (_scaffoldKey.currentState?.isDrawerOpen ?? false),
       ),
     );
   }
@@ -169,18 +180,49 @@ class _GamePageState extends State<GamePage> {
   void _whiteFlag() => _bloc.add(WhiteFlagEvent());
 
   void _openChat() {
-    _scaffoldKey.currentState?.openDrawer();
     _bloc.add(OpenChatEvent());
+    if (isPlatformDesktop) {
+      _scaffoldKey.currentState?.openDrawer();
+    } else {
+      _isChatOpen = true;
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => ChatWidget(
+            bloc: _bloc,
+            controller: _chatInputController,
+            closeChat: () {
+              _isChatOpen = false;
+              Navigator.of(context).pop();
+            },
+          ),
+        ),
+      );
+    }
   }
 
   void _newGame() => _socketsController.startGame();
 
   void _onReceiveNewGameSocketData(SocketDto data) {
     if (data.ack) {
-      _startNewGame(data);
+      if (data.accept) {
+        _startNewGame(data);
+      } else {
+        showSnackbar(context, 'Desafio recusado');
+      }
     } else {
       _showChallengeDialog(data);
     }
+  }
+
+  void _onDisconnectedPairSocketData(SocketDto data) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => disconnectedPairDialog(
+        goHome: _goHome,
+        enemyName: widget.enemyName,
+      ),
+    );
   }
 
   void _showChallengeDialog(SocketDto data) {
@@ -193,6 +235,7 @@ class _GamePageState extends State<GamePage> {
       barrierDismissible: false,
       builder: (context) => challengeDialogWidget(
         accept: () => _acceptChallenge(data),
+        decline: () => _declineChallenge(data),
         firstPlayer: firstPlayer,
         secondPlayer: secondPlayer,
         newGame: true,
@@ -202,14 +245,13 @@ class _GamePageState extends State<GamePage> {
   }
 
   void _acceptChallenge(SocketDto data) {
-    _socketsController.sendMessage(
-      SocketDto.start(
-        start: !data.start,
-        ack: true,
-        enemy: widget.myUserName,
-      ),
-    );
+    _socketsController.accept(!data.start);
     _startNewGame(data);
+    Navigator.of(context).pop();
+  }
+
+  void _declineChallenge(SocketDto data) {
+    _socketsController.decline(!data.start);
     Navigator.of(context).pop();
   }
 
@@ -219,5 +261,18 @@ class _GamePageState extends State<GamePage> {
       widget.myUserName,
     );
     _bloc.add(NewGameEvent(data.start, firstPlayer, secondPlayer));
+  }
+
+  void _exit() {
+    _socketsController.exit();
+    _goHome();
+  }
+
+  void _goHome() {
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => const HomePage()),
+      (route) => false,
+    );
   }
 }

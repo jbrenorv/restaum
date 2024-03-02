@@ -2,7 +2,8 @@ enum DataType {
   chat,
   movement,
   start,
-  whiteFlag;
+  whiteFlag,
+  disconnectedPair;
 
   int toMap() => DataType.values.indexOf(this);
 

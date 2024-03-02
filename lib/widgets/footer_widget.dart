@@ -27,6 +27,7 @@ class FooterWidget extends StatelessWidget {
                     : state.myTurn
                         ? 'Sua vez!'
                         : 'Aguardando oponente...',
+                textAlign: TextAlign.center,
               ),
             ),
           ],

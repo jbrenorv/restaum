@@ -6,18 +6,20 @@ class ElevatedButtonWidget extends StatelessWidget {
     required this.onPressed,
     required this.text,
     this.loading = false,
+    this.color,
   });
 
   final String text;
   final VoidCallback? onPressed;
   final bool loading;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
       onPressed: loading ? null : onPressed,
       style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.lime,
+        backgroundColor: color ?? Colors.lime,
         elevation: 8.0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8.0),
@@ -36,6 +38,7 @@ class ElevatedButtonWidget extends StatelessWidget {
               child: Text(
                 text,
                 style: const TextStyle(color: Colors.black),
+                textAlign: TextAlign.center,
               ),
             ),
     );

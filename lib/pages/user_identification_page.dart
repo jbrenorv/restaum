@@ -20,28 +20,33 @@ class _UserIdentificationPageState extends State<UserIdentificationPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: ConstrainedBox(
-          constraints: BoxConstraints.loose(const Size.fromWidth(400.0)),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              TextField(
-                controller: _userNameInputController,
-                textAlign: TextAlign.center,
-                textInputAction: TextInputAction.done,
-                onEditingComplete: _initialize,
-                onChanged: (_) => setState(() {}),
-                decoration: const InputDecoration(hintText: 'Informe seu nome'),
-              ),
-              const SizedBox(height: 32.0),
-              ElevatedButtonWidget(
-                onPressed: !isValid ? null : _initialize,
-                text: 'Encontrar adversário',
-                loading: _loading,
-              ),
-            ],
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: BoxConstraints.loose(const Size.fromWidth(400.0)),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                TextField(
+                  controller: _userNameInputController,
+                  textAlign: TextAlign.center,
+                  textInputAction: TextInputAction.done,
+                  onEditingComplete: _initialize,
+                  onChanged: (_) => setState(() {}),
+                  decoration: const InputDecoration(
+                    hintText: 'Informe seu nome',
+                  ),
+                ),
+                const SizedBox(height: 32.0),
+                ElevatedButtonWidget(
+                  onPressed: !isValid ? null : _initialize,
+                  text: 'Encontrar adversário',
+                  loading: _loading,
+                ),
+              ],
+            ),
           ),
         ),
       ),

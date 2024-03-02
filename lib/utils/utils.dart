@@ -1,3 +1,7 @@
+import 'dart:io';
+
+import 'package:flutter/material.dart';
+
 import '../entities/cell_entity.dart';
 import '../entities/destination_entity.dart';
 import '../socket/dto/socket_dto.dart';
@@ -56,4 +60,19 @@ bool isGameOver(List<CellEntity> board) {
     for (final cell in board) ...getAvailableDestinations(cell.index, board),
   ];
   return destinations.isEmpty;
+}
+
+bool get isPlatformDesktop =>
+    Platform.isLinux || Platform.isMacOS || Platform.isWindows;
+
+void showSnackbar(BuildContext context, String message) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      behavior: SnackBarBehavior.fixed,
+      content: Text(
+        message,
+        textAlign: TextAlign.center,
+      ),
+    ),
+  );
 }
