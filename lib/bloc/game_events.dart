@@ -1,6 +1,6 @@
+import '../core/dto/dto.dart';
 import '../entities/cell_entity.dart';
 import '../entities/chat_message_entity.dart';
-import '../socket/dto/socket_dto.dart';
 
 abstract class GameEvent {}
 
@@ -26,7 +26,7 @@ class SendMessageEvent extends GameEvent {
 }
 
 class SocketDataEvent extends GameEvent {
-  final SocketDto data;
+  final Dto data;
   final bool chatOpen;
 
   SocketDataEvent({

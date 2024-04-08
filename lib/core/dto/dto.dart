@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'data_type.dart';
 
-class SocketDto {
+class Dto {
   final DataType type;
 
   // start game command
@@ -21,7 +21,7 @@ class SocketDto {
   // chat
   final String message;
 
-  SocketDto({
+  Dto({
     required this.type,
     required this.start,
     required this.ack,
@@ -33,13 +33,13 @@ class SocketDto {
     required this.message,
   });
 
-  factory SocketDto.start({
+  factory Dto.start({
     required bool start,
     required bool ack,
     required bool accept,
     required String enemy,
   }) {
-    return SocketDto(
+    return Dto(
       type: DataType.start,
       start: start,
       ack: ack,
@@ -52,8 +52,8 @@ class SocketDto {
     );
   }
 
-  factory SocketDto.chat({required String message}) {
-    return SocketDto(
+  factory Dto.chat({required String message}) {
+    return Dto(
       type: DataType.chat,
       start: false,
       ack: false,
@@ -66,12 +66,12 @@ class SocketDto {
     );
   }
 
-  factory SocketDto.movement({
+  factory Dto.movement({
     required int sourceIndex,
     required int captureIndex,
     required int destinationIndex,
   }) {
-    return SocketDto(
+    return Dto(
       type: DataType.movement,
       start: false,
       ack: false,
@@ -84,8 +84,8 @@ class SocketDto {
     );
   }
 
-  factory SocketDto.whiteFlag() {
-    return SocketDto(
+  factory Dto.whiteFlag() {
+    return Dto(
       type: DataType.whiteFlag,
       start: false,
       ack: false,
@@ -98,8 +98,8 @@ class SocketDto {
     );
   }
 
-  factory SocketDto.disconnectedPair() {
-    return SocketDto(
+  factory Dto.disconnectedPair() {
+    return Dto(
       type: DataType.disconnectedPair,
       start: false,
       ack: false,
@@ -126,8 +126,8 @@ class SocketDto {
     };
   }
 
-  factory SocketDto.fromMap(Map<String, dynamic> map) {
-    return SocketDto(
+  factory Dto.fromMap(Map<String, dynamic> map) {
+    return Dto(
       type: DataType.fromMap(map['type']),
       start: map['start'] as bool,
       ack: map['ack'] as bool,
@@ -142,6 +142,6 @@ class SocketDto {
 
   String toJson() => json.encode(toMap());
 
-  factory SocketDto.fromJson(String source) =>
-      SocketDto.fromMap(json.decode(source) as Map<String, dynamic>);
+  factory Dto.fromJson(String source) =>
+      Dto.fromMap(json.decode(source) as Map<String, dynamic>);
 }

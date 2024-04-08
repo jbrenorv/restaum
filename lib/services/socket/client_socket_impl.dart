@@ -6,33 +6,35 @@ import 'dart:typed_data';
 
 import 'package:network_info_plus/network_info_plus.dart';
 
-import 'dto/socket_dto.dart';
+import '../../core/client_base.dart';
+import '../../core/dto/dto.dart';
 
 enum ConnectionInitiator { i, other }
 
-class GameSocketsController {
-  GameSocketsController._();
-
-  static final GameSocketsController _instance = GameSocketsController._();
-
-  static GameSocketsController get instance => _instance;
-
+class SocketClientImpl implements ClientBase {
+  @override
   late final String serverIp;
+
+  @override
   late final int serverPort;
+
+  @override
   late final String userName;
 
-  late final StreamController<SocketDto> _dataStreamCotroller;
+  late final StreamController<Dto> _dataStreamCotroller;
   late final ServerSocket _server;
   late Socket _socket;
 
-  Stream<SocketDto> get dataStream => _dataStreamCotroller.stream;
+  @override
+  Stream<Dto> get dataStream => _dataStreamCotroller.stream;
 
+  @override
   Future<void> initialize(String userName) async {
     dynamic address = await NetworkInfo().getWifiIP();
     address ??= InternetAddress.anyIPv4;
 
     _server = await ServerSocket.bind(address, 1024);
-    _dataStreamCotroller = StreamController<SocketDto>.broadcast();
+    _dataStreamCotroller = StreamController<Dto>.broadcast();
 
     this.userName = userName;
     serverPort = _server.port;
@@ -46,6 +48,7 @@ class GameSocketsController {
     );
   }
 
+  @override
   void connectToRemoteServer(
     String ip,
     int port, {
@@ -76,20 +79,21 @@ class GameSocketsController {
 
   void _onReceiveData(Uint8List rawData) {
     final json = utf8.decode(rawData);
-    final data = SocketDto.fromJson(json);
+    final data = Dto.fromJson(json);
     _dataStreamCotroller.add(data);
   }
 
   void _onErrorOrDone() {
-    _dataStreamCotroller.add(SocketDto.disconnectedPair());
+    _dataStreamCotroller.add(Dto.disconnectedPair());
   }
 
+  @override
   void startGame() {
     // randomly select who will make the first move
     final enemyStarts = Random().nextInt(2).isEven;
 
     _sendMessage(
-      SocketDto.start(
+      Dto.start(
         start: enemyStarts,
         ack: false,
         accept: false,
@@ -98,13 +102,15 @@ class GameSocketsController {
     );
   }
 
+  @override
   void exit() {
-    _sendMessage(SocketDto.disconnectedPair());
+    _sendMessage(Dto.disconnectedPair());
   }
 
+  @override
   void accept(bool start) {
     _sendMessage(
-      SocketDto.start(
+      Dto.start(
         start: start,
         ack: true,
         accept: true,
@@ -113,9 +119,10 @@ class GameSocketsController {
     );
   }
 
+  @override
   void decline(bool start) {
     _sendMessage(
-      SocketDto.start(
+      Dto.start(
         start: start,
         ack: true,
         accept: false,
@@ -124,21 +131,24 @@ class GameSocketsController {
     );
   }
 
+  @override
   void chat(String message) {
-    _sendMessage(SocketDto.chat(message: message));
+    _sendMessage(Dto.chat(message: message));
   }
 
+  @override
   void whiteFlag() {
-    _sendMessage(SocketDto.whiteFlag());
+    _sendMessage(Dto.whiteFlag());
   }
 
+  @override
   void movement({
     required int sourceIndex,
     required int captureIndex,
     required int destinationIndex,
   }) {
     _sendMessage(
-      SocketDto.movement(
+      Dto.movement(
         sourceIndex: sourceIndex,
         captureIndex: captureIndex,
         destinationIndex: destinationIndex,
@@ -146,7 +156,7 @@ class GameSocketsController {
     );
   }
 
-  void _sendMessage(SocketDto dto) async {
+  void _sendMessage(Dto dto) async {
     await _socket.flush();
     _socket.write(dto.toJson());
   }

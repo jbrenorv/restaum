@@ -2,10 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../socket/dto/data_type.dart';
-import '../socket/dto/socket_dto.dart';
-import '../socket/game_sockets_controller.dart';
+import '../core/client_base.dart';
+import '../core/dto/data_type.dart';
+import '../core/dto/dto.dart';
 import '../utils/utils.dart';
 import '../widgets/challenge_dialog_widget.dart';
 import '../widgets/elevated_button_widget.dart';
@@ -23,7 +24,7 @@ class _HomePageState extends State<HomePage> {
   late final String _serverPort;
   late final String _userName;
   late final StreamSubscription _streamSubscription;
-  late final GameSocketsController _controller;
+  late final ClientBase _client;
 
   final _enemyIpInput = TextEditingController();
   final _enemyPortInput = TextEditingController();
@@ -34,11 +35,11 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    _controller = GameSocketsController.instance;
-    _serverIp = _controller.serverIp;
-    _serverPort = _controller.serverPort.toString();
-    _userName = _controller.userName;
-    _streamSubscription = _controller.dataStream.listen(_onReceiveData);
+    _client = context.read<ClientBase>();
+    _serverIp = _client.serverIp;
+    _serverPort = _client.serverPort.toString();
+    _userName = _client.userName;
+    _streamSubscription = _client.dataStream.listen(_onReceiveData);
     super.initState();
   }
 
@@ -140,7 +141,7 @@ class _HomePageState extends State<HomePage> {
 
   void _onInputChange(String _) => setState(() {});
 
-  void _onReceiveData(SocketDto data) {
+  void _onReceiveData(Dto data) {
     if (data.type.equals(DataType.start)) {
       if (data.ack) {
         if (data.accept) {
@@ -160,10 +161,10 @@ class _HomePageState extends State<HomePage> {
     setState(() => _connecting = true);
     final ip = _enemyIpInput.text;
     final port = int.parse(_enemyPortInput.text);
-    _controller.connectToRemoteServer(ip, port, onError: _onConnectError);
+    _client.connectToRemoteServer(ip, port, onError: _onConnectError);
   }
 
-  void _showChallengeDialog(SocketDto data) {
+  void _showChallengeDialog(Dto data) {
     var (firstPlayer, secondPlayer) = getMatchDisplayOrder(data, _userName);
     showDialog(
       context: context,
@@ -179,13 +180,13 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void _acceptChallenge(SocketDto data) {
-    _controller.accept(!data.start);
+  void _acceptChallenge(Dto data) {
+    _client.accept(!data.start);
     _navigateToGamePage(data);
   }
 
-  void _declineChallenge(SocketDto data) {
-    _controller.decline(!data.start);
+  void _declineChallenge(Dto data) {
+    _client.decline(!data.start);
     Navigator.of(context).pop();
   }
 
@@ -194,7 +195,7 @@ class _HomePageState extends State<HomePage> {
     showSnackbar(context, 'Não foi possível se conectar');
   }
 
-  void _navigateToGamePage(SocketDto data) {
+  void _navigateToGamePage(Dto data) {
     var (firstPlayer, secondPlayer) = getMatchDisplayOrder(data, _userName);
     Navigator.pushAndRemoveUntil(
       context,

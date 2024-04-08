@@ -2,9 +2,9 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 
+import '../core/dto/dto.dart';
 import '../entities/cell_entity.dart';
 import '../entities/destination_entity.dart';
-import '../socket/dto/socket_dto.dart';
 
 const deltaDestination = [-22, 22, -2, 2];
 const deltaEnemy = [-11, 11, -1, 1];
@@ -43,7 +43,7 @@ bool isDestination(List<DestinationEntity> destinations, CellEntity cell) {
   return false;
 }
 
-(String, String) getMatchDisplayOrder(SocketDto data, String userName) {
+(String, String) getMatchDisplayOrder(Dto data, String userName) {
   var firstPlayer = data.enemy;
   var secondPlayer = userName;
 

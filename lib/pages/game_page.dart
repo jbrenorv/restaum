@@ -3,15 +3,14 @@ import 'dart:async';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:restaum/pages/home_page.dart';
 
 import '../bloc/game_bloc.dart';
 import '../bloc/game_events.dart';
 import '../bloc/game_state.dart';
+import '../core/client_base.dart';
 import '../entities/cell_entity.dart';
-import '../socket/dto/data_type.dart';
-import '../socket/dto/socket_dto.dart';
-import '../socket/game_sockets_controller.dart';
+import '../core/dto/data_type.dart';
+import '../core/dto/dto.dart';
 import '../utils/utils.dart';
 import '../widgets/app_bar_widget.dart';
 import '../widgets/cell_widget.dart';
@@ -21,6 +20,7 @@ import '../widgets/disconnected_pair_dialog_widget.dart';
 import '../widgets/floating_action_buttons_widget.dart';
 import '../widgets/footer_widget.dart';
 import '../widgets/game_over_dialog.dart';
+import 'home_page.dart';
 
 class GamePage extends StatefulWidget {
   const GamePage({
@@ -43,7 +43,7 @@ class GamePage extends StatefulWidget {
 
 class _GamePageState extends State<GamePage> {
   late final GameBloc _bloc;
-  late final GameSocketsController _socketsController;
+  late final ClientBase _client;
   late final StreamSubscription _streamSubscription;
 
   final _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -52,11 +52,11 @@ class _GamePageState extends State<GamePage> {
 
   @override
   void initState() {
-    _socketsController = GameSocketsController.instance;
-    _streamSubscription = _socketsController.dataStream.listen(_onSocketData);
+    _client = context.read<ClientBase>();
+    _streamSubscription = _client.dataStream.listen(_onSocketData);
     _bloc = GameBloc(
       AudioPlayer(),
-      _socketsController,
+      _client,
       widget.myTurn,
       widget.firstPlayer,
       widget.secondPlayer,
@@ -157,7 +157,7 @@ class _GamePageState extends State<GamePage> {
   void _onCellDropped(CellEntity cell, CellEntity destination) =>
       _bloc.add(CellDroppedEvent(cell, destination));
 
-  void _onSocketData(SocketDto data) {
+  void _onSocketData(Dto data) {
     if (data.type.equals(DataType.disconnectedPair)) {
       _onDisconnectedPairSocketData(data);
       return;
@@ -200,9 +200,9 @@ class _GamePageState extends State<GamePage> {
     }
   }
 
-  void _newGame() => _socketsController.startGame();
+  void _newGame() => _client.startGame();
 
-  void _onReceiveNewGameSocketData(SocketDto data) {
+  void _onReceiveNewGameSocketData(Dto data) {
     if (data.ack) {
       if (data.accept) {
         _startNewGame(data);
@@ -214,7 +214,7 @@ class _GamePageState extends State<GamePage> {
     }
   }
 
-  void _onDisconnectedPairSocketData(SocketDto data) {
+  void _onDisconnectedPairSocketData(Dto data) {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -225,7 +225,7 @@ class _GamePageState extends State<GamePage> {
     );
   }
 
-  void _showChallengeDialog(SocketDto data) {
+  void _showChallengeDialog(Dto data) {
     var (firstPlayer, secondPlayer) = getMatchDisplayOrder(
       data,
       widget.myUserName,
@@ -244,18 +244,18 @@ class _GamePageState extends State<GamePage> {
     );
   }
 
-  void _acceptChallenge(SocketDto data) {
-    _socketsController.accept(!data.start);
+  void _acceptChallenge(Dto data) {
+    _client.accept(!data.start);
     _startNewGame(data);
     Navigator.of(context).pop();
   }
 
-  void _declineChallenge(SocketDto data) {
-    _socketsController.decline(!data.start);
+  void _declineChallenge(Dto data) {
+    _client.decline(!data.start);
     Navigator.of(context).pop();
   }
 
-  void _startNewGame(SocketDto data) {
+  void _startNewGame(Dto data) {
     var (firstPlayer, secondPlayer) = getMatchDisplayOrder(
       data,
       widget.myUserName,
@@ -264,7 +264,7 @@ class _GamePageState extends State<GamePage> {
   }
 
   void _exit() {
-    _socketsController.exit();
+    _client.exit();
     _goHome();
   }
 

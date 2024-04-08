@@ -1,10 +1,13 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:windows_single_instance/windows_single_instance.dart';
 
+import 'core/client_base.dart';
 import 'pages/user_identification_page.dart';
+import 'services/socket/client_socket_impl.dart';
 import 'utils/constants.dart';
 
 void main(List<String> args) async {
@@ -28,18 +31,21 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        useMaterial3: true,
-        scaffoldBackgroundColor: const Color(0xFFDDDDDD),
-        fontFamily: Constants.pressStartFontFamily,
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFFDDDDDD),
-          surfaceTintColor: Colors.transparent,
+    return RepositoryProvider<ClientBase>(
+      create: (context) => SocketClientImpl(),
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          useMaterial3: true,
+          scaffoldBackgroundColor: const Color(0xFFDDDDDD),
+          fontFamily: Constants.pressStartFontFamily,
+          appBarTheme: const AppBarTheme(
+            backgroundColor: Color(0xFFDDDDDD),
+            surfaceTintColor: Colors.transparent,
+          ),
         ),
+        home: const UserIdentificationPage(),
       ),
-      home: const UserIdentificationPage(),
     );
   }
 }

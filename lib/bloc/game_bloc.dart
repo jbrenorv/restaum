@@ -1,10 +1,10 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:bloc/bloc.dart';
 
+import '../core/client_base.dart';
+import '../core/dto/data_type.dart';
 import '../entities/chat_message_entity.dart';
 import '../entities/destination_entity.dart';
-import '../socket/dto/data_type.dart';
-import '../socket/game_sockets_controller.dart';
 import '../utils/constants.dart';
 import '../utils/utils.dart';
 import 'game_events.dart';
@@ -12,11 +12,11 @@ import 'game_state.dart';
 
 class GameBloc extends Bloc<GameEvent, GameState> {
   final AudioPlayer _audioPlayer;
-  final GameSocketsController _socketsController;
+  final ClientBase _client;
 
   GameBloc(
     this._audioPlayer,
-    this._socketsController,
+    this._client,
     bool myTurn,
     String firstPlayer,
     String secondPlayer,
@@ -74,7 +74,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
   }
 
   void _sendMessage(SendMessageEvent event, Emitter emit) {
-    _socketsController.chat(event.message.text);
+    _client.chat(event.message.text);
     emit(state.copyWith(messages: state.messages..add(event.message)));
   }
 
@@ -113,7 +113,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
   }
 
   void _onWhiteFlag(WhiteFlagEvent event, Emitter emit) {
-    _socketsController.whiteFlag();
+    _client.whiteFlag();
     emit(state.copyWith(gameOver: true, whiteFlag: false));
   }
 
@@ -146,7 +146,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
           .firstWhere((d) => d.destination == destinationIndex)
           .capture;
 
-      _socketsController.movement(
+      _client.movement(
         sourceIndex: sourceIndex,
         captureIndex: captureIndex,
         destinationIndex: destinationIndex,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../socket/game_sockets_controller.dart';
+import '../core/client_base.dart';
 import '../widgets/elevated_button_widget.dart';
 import 'home_page.dart';
 
@@ -12,10 +13,17 @@ class UserIdentificationPage extends StatefulWidget {
 }
 
 class _UserIdentificationPageState extends State<UserIdentificationPage> {
+  late final ClientBase _client;
   final _userNameInputController = TextEditingController();
 
   bool _loading = false;
   bool get isValid => _userNameInputController.text.isNotEmpty;
+
+  @override
+  void initState() {
+    _client = context.read<ClientBase>();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +67,7 @@ class _UserIdentificationPageState extends State<UserIdentificationPage> {
     setState(() => _loading = true);
 
     final userName = _userNameInputController.text;
-    await GameSocketsController.instance.initialize(userName);
+    await _client.initialize(userName);
 
     _navigateToHomePage();
   }
