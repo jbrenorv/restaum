@@ -7,7 +7,7 @@ import 'package:windows_single_instance/windows_single_instance.dart';
 
 import 'core/client_base.dart';
 import 'pages/user_identification_page.dart';
-import 'services/socket/client_socket_impl.dart';
+import 'services/rpc/rpc_client_impl.dart';
 import 'utils/constants.dart';
 
 void main(List<String> args) async {
@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return RepositoryProvider<ClientBase>(
-      create: (context) => SocketClientImpl(),
+      create: (context) => RpcClientImpl(),
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         theme: ThemeData(

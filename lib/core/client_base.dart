@@ -12,6 +12,7 @@ abstract class ClientBase {
   void connectToRemoteServer(
     String ip,
     int port, {
+    bool initGame = true,
     void Function(dynamic)? onError,
   });
 
@@ -19,9 +20,9 @@ abstract class ClientBase {
 
   void exit();
 
-  void accept(bool start);
+  void accept(Dto dto);
 
-  void decline(bool start);
+  void decline(Dto dto);
 
   void chat(String message);
 

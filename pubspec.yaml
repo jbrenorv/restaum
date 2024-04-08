@@ -19,6 +19,8 @@ dependencies:
   window_manager: ^0.3.8
   network_info_plus: ^4.1.0+1
   windows_single_instance: ^1.0.1
+  grpc: ^3.2.4
+  protobuf: ^3.1.0
 
 dev_dependencies:
   flutter_test:

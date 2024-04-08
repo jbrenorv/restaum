@@ -9,8 +9,6 @@ import 'package:network_info_plus/network_info_plus.dart';
 import '../../core/client_base.dart';
 import '../../core/dto/dto.dart';
 
-enum ConnectionInitiator { i, other }
-
 class SocketClientImpl implements ClientBase {
   @override
   late final String serverIp;
@@ -40,31 +38,22 @@ class SocketClientImpl implements ClientBase {
     serverPort = _server.port;
     serverIp = _server.address.address;
 
-    _server.listen(
-      (socket) => _onConnectionEstablished(
-        socket,
-        ConnectionInitiator.other,
-      ),
-    );
+    _server.listen((socket) => _onConnectionEstablished(socket, false));
   }
 
   @override
   void connectToRemoteServer(
     String ip,
     int port, {
+    bool initGame = true,
     void Function(dynamic)? onError,
   }) {
     Socket.connect(ip, port, timeout: const Duration(seconds: 10))
-        .then(
-          (socket) => _onConnectionEstablished(
-            socket,
-            ConnectionInitiator.i,
-          ),
-        )
+        .then((socket) => _onConnectionEstablished(socket, initGame))
         .catchError((e) => onError?.call(e));
   }
 
-  void _onConnectionEstablished(Socket socket, ConnectionInitiator initiator) {
+  void _onConnectionEstablished(Socket socket, bool initGame) {
     _socket = socket;
     _socket.encoding = utf8;
     _socket.listen(
@@ -74,7 +63,7 @@ class SocketClientImpl implements ClientBase {
       onDone: _onErrorOrDone,
     );
 
-    if (initiator == ConnectionInitiator.i) startGame();
+    if (initGame) startGame();
   }
 
   void _onReceiveData(Uint8List rawData) {
@@ -98,6 +87,8 @@ class SocketClientImpl implements ClientBase {
         ack: false,
         accept: false,
         enemy: userName,
+        ip: serverIp,
+        port: serverPort,
       ),
     );
   }
@@ -108,25 +99,29 @@ class SocketClientImpl implements ClientBase {
   }
 
   @override
-  void accept(bool start) {
+  void accept(Dto dto) {
     _sendMessage(
       Dto.start(
-        start: start,
+        start: !dto.start,
         ack: true,
         accept: true,
         enemy: userName,
+        ip: serverIp,
+        port: serverPort,
       ),
     );
   }
 
   @override
-  void decline(bool start) {
+  void decline(Dto dto) {
     _sendMessage(
       Dto.start(
-        start: start,
+        start: !dto.start,
         ack: true,
         accept: false,
         enemy: userName,
+        ip: serverIp,
+        port: serverPort,
       ),
     );
   }

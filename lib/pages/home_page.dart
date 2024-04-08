@@ -181,12 +181,12 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _acceptChallenge(Dto data) {
-    _client.accept(!data.start);
+    _client.accept(data);
     _navigateToGamePage(data);
   }
 
   void _declineChallenge(Dto data) {
-    _client.decline(!data.start);
+    _client.decline(data);
     Navigator.of(context).pop();
   }
 

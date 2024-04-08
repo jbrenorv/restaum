@@ -245,13 +245,13 @@ class _GamePageState extends State<GamePage> {
   }
 
   void _acceptChallenge(Dto data) {
-    _client.accept(!data.start);
+    _client.accept(data);
     _startNewGame(data);
     Navigator.of(context).pop();
   }
 
   void _declineChallenge(Dto data) {
-    _client.decline(!data.start);
+    _client.decline(data);
     Navigator.of(context).pop();
   }
 
